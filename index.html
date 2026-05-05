@@ -587,7 +587,7 @@ html, body { height: 100%; background: var(--verde-oscuro); font-family: 'Lato',
         <div class="card-body">
           <div class="field">
             <label>Lunes a Viernes (COP/hora)</label>
-            <input type="number" id="cfg-tarifa-lv" value="7700">
+            <input type="number" id="cfg-tarifa-lv" value="7200">
           </div>
           <div class="field">
             <label>Sábados y Domingos (COP/hora)</label>
@@ -690,7 +690,7 @@ html, body { height: 100%; background: var(--verde-oscuro); font-family: 'Lato',
 // ESTADO GLOBAL (localStorage como base de datos)
 // ═══════════════════════════════════════════════════════
 
-const TARIFA_LV  = 7700;
+const TARIFA_LV  = 7200;
 const TARIFA_SD  = 9000;
 
 // Festivos Colombia 2025–2026 (estáticos para no depender de API)
@@ -900,12 +900,15 @@ function renderEmpleados() {
     const div = document.createElement('div');
     div.className = 'emp-card';
     div.innerHTML = `
-      <div class="emp-avatar">${emp.foto ? `<img src="${emp.foto}">` : getInitials(emp.nombre)}</div>
+      <div class="emp-avatar">${emp.foto ? <img src="${emp.foto}"> : getInitials(emp.nombre)}</div>
       <div class="emp-info">
         <div class="emp-name">${emp.nombre}</div>
         <div class="emp-status">ID: ${emp.id}</div>
       </div>
-      <button class="btn btn-outline btn-sm" onclick="openEditEmp(${emp.id})" style="border-color:var(--ambar);color:var(--ambar)">✏️ Editar</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline btn-sm" onclick="openEditEmp(${emp.id})" style="border-color:var(--ambar);color:var(--ambar); padding: 5px 10px;">✏️ Editar</button>
+        <button class="btn btn-outline btn-sm" onclick="eliminarEmpleado(${emp.id})" style="border-color:#8B2020; color:#8B2020; padding: 5px 10px;">🗑️ Borrar</button>
+      </div>
     `;
     lista.appendChild(div);
   });
@@ -982,6 +985,16 @@ function guardarEdicionEmp() {
   closeModal('modal-edit-emp');
   renderEmpleados();
   toast('✅ Empleado actualizado');
+}
+  function eliminarEmpleado(id) {
+  if (confirm("¿Estás seguro de que deseas eliminar a este empleado? Se borrarán sus datos permanentemente.")) {
+    let emps = getEmpleados();
+    // Filtramos la lista para quitar al empleado con ese ID
+    emps = emps.filter(e => e.id !== id);
+    saveEmpleados(emps);
+    renderEmpleados(); // Actualiza la lista en pantalla
+    toast('🗑️ Empleado eliminado');
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1841,6 +1854,7 @@ function guardarTarifas() {
   window.TARIFA_LV_custom = lv;
   window.TARIFA_SD_custom = sd;
   toast('✅ Tarifas guardadas correctamente');
+  setTimeout(() => {location.reload();},800);
 }
 
 // ═══════════════════════════════════════════════════════
